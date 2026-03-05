@@ -1,26 +1,31 @@
-name: Docker
+name: Build ingress-nginx from source
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "The ingress-nginx release tag to build (e.g. controller-v1.12.1)"
+        required: true
+        type: string
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  SOURCE_REPO: https://github.com/chainguard-forks/ingress-nginx
 
 jobs:
   docker-images:
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
       contents: read
       packages: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
+      - name: Clone ingress-nginx at tag ${{ inputs.release_tag }}
+        run: |
+          git clone --depth 1 --branch "${{ inputs.release_tag }}" \
+            "${{ env.SOURCE_REPO }}" ingress-nginx
+        
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -43,26 +48,25 @@ jobs:
           flavor: |
             latest=false
           tags: |
-            type=sha
-            type=ref,event=pr
-            type=ref,event=branch
-        env:
-          DOCKER_METADATA_SHORT_SHA_LENGTH: 10
-    
+            type=raw,value=${{ inputs.release_tag }}
+
       - name: Build ingress controller, debug tool and pre-stop hook (amd64)
+        working-directory: ingress-nginx
         run: make build ARCH=amd64
 
       - name: Build ingress controller, debug tool and pre-stop hook (arm64)
+        working-directory: ingress-nginx
         run: make build ARCH=arm64
 
       - name: Read NGINX_BASE
+        working-directory: ingress-nginx
         run: echo "NGINX_BASE=$(cat NGINX_BASE)" >> $GITHUB_ENV
 
       - name: Build and Push
         uses: docker/build-push-action@v6
         with:
-          context: rootfs
-          push: ${{ github.ref == 'refs/heads/main' }}
+          context: ingress-nginx/rootfs
+          push: true
           sbom: true
           provenance: true
           labels: ${{ steps.meta.outputs.labels }}
