@@ -28,6 +28,10 @@ jobs:
         run: |
           git clone --depth 1 --branch "${{ inputs.release_tag }}" \
             "${{ env.SOURCE_REPO }}" ingress-nginx
+
+      - name: Extract Go version from upstream source
+        id: go-version
+        run: echo "version=$(cat ingress-nginx/GOLANG_VERSION)" >> $GITHUB_OUTPUT
         
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -41,6 +45,20 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push kube-webhook-certgen
+        uses: docker/build-push-action@v6
+        with:
+          context: ingress-nginx/images/kube-webhook-certgen/rootfs
+          push: true
+          sbom: true
+          provenance: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/kube-webhook-certgen:${{ inputs.release_tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            GOLANG_VERSION=${{ steps.go-version.outputs.version }}
 
       - name: Extract Docker metadata
         id: meta
