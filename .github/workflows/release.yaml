@@ -46,6 +46,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract kube-webhook-certgen tag
+        id: kube-webhook-certgen-version
+        run: echo "version=$(cat ingress-nginx/images/kube-webhook-certgen/TAG)" >> $GITHUB_OUTPUT
+
       - name: Build and push kube-webhook-certgen
         uses: docker/build-push-action@v6
         with:
@@ -54,7 +58,7 @@ jobs:
           sbom: true
           provenance: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/kube-webhook-certgen:${{ inputs.release_tag }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/kube-webhook-certgen:${{ steps.kube-webhook-certgen-version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
