@@ -51,7 +51,7 @@ jobs:
           helm package \
             --destination _dist \
             ingress-nginx/charts/ingress-nginx
-          helm push _dist/ingress-nginx-*.tgz oci://${{ env.REGISRY }}/${{ github.repository_owner }}/charts
+          helm push _dist/ingress-nginx-*.tgz oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts
 
       - name: Extract kube-webhook-certgen tag
         id: kube-webhook-certgen-version
