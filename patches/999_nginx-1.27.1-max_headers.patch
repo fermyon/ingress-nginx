@@ -1,4 +1,4 @@
-From d6c88d427fd4154d1b6a0ae2f21401d20155f161 Mon Sep 17 00:00:00 2001
+From 5abb497397bf6ea8e38b4f640db682e7858e24da Mon Sep 17 00:00:00 2001
 From: Maxim Dounin <mdounin@mdounin.ru>
 Date: Fri, 24 May 2024 00:20:01 +0300
 Subject: [PATCH] Added max_headers directive.
@@ -13,6 +13,7 @@ Requested by Maksim Yevmenkin.
 
 Signed-off-by: Elijah Zupancic <e.zupancic@f5.com>
 Origin: <https://freenginx.org/hg/nginx/rev/199dc0d6b05be814b5c811876c20af58cd361fea>
+(cherry picked from commit 365694160a85229a7cb006738de9260d49ff5fa2)
 ---
  src/http/ngx_http_core_module.c   | 10 ++++++++++
  src/http/ngx_http_core_module.h   |  2 ++
@@ -103,10 +104,10 @@ index 65c8333f8..22452802a 100644
      ngx_table_elt_t                  *host;
      ngx_table_elt_t                  *connection;
 diff --git a/src/http/v2/ngx_http_v2.c b/src/http/v2/ngx_http_v2.c
-index 91a28b228..c42824244 100644
+index 0f5bd3de8..a4cce4f77 100644
 --- a/src/http/v2/ngx_http_v2.c
 +++ b/src/http/v2/ngx_http_v2.c
-@@ -1822,6 +1822,15 @@ ngx_http_v2_state_process_header(ngx_http_v2_connection_t *h2c, u_char *pos,
+@@ -1817,6 +1817,15 @@ ngx_http_v2_state_process_header(ngx_http_v2_connection_t *h2c, u_char *pos,
          }
  
      } else {
@@ -123,10 +124,10 @@ index 91a28b228..c42824244 100644
          if (h == NULL) {
              return ngx_http_v2_connection_error(h2c,
 diff --git a/src/http/v3/ngx_http_v3_request.c b/src/http/v3/ngx_http_v3_request.c
-index e41ad50a8..e457d8849 100644
+index 87f5f3214..95f3d279b 100644
 --- a/src/http/v3/ngx_http_v3_request.c
 +++ b/src/http/v3/ngx_http_v3_request.c
-@@ -665,6 +665,15 @@ ngx_http_v3_process_header(ngx_http_request_t *r, ngx_str_t *name,
+@@ -657,6 +657,15 @@ ngx_http_v3_process_header(ngx_http_request_t *r, ngx_str_t *name,
          }
  
      } else {
